@@ -10,6 +10,24 @@ namespace WorldCup2018
     {
         static void Main(string[] args)
         {
+            List<Team> teams = new List<Team>()
+           {
+               new Team("England"),
+               new Team("France"),
+               new Team("Germany"),
+               new Team("Brazil")
+           };
+
+            RoundOf32Group groupA = new RoundOf32Group(teams, "Group A");
+            var winners = groupA.ChooseWinners();
+            
+            foreach(Team winner in winners)
+            {
+                Console.Write(winner.ToString());
+            }
+
+            Console.ReadLine();
+            
         }
     }
 
@@ -26,6 +44,15 @@ namespace WorldCup2018
             Points = 0;
             GoalsScored = 0;
             GoalDiff = 0;
+        }
+
+        public override string ToString()
+        {
+            return "Name: " + Name +
+                   "\n\tPoints: " + Points +
+                   "\n\tGoalsScored: " + GoalsScored +
+                   "\n\tGoalDiff: " + GoalDiff +
+                   "\n";
         }
     }
 
@@ -141,6 +168,15 @@ namespace WorldCup2018
         public List<Match> Matches { get; set; }
         public MatchHistory MatchHistory { get; set; }
 
+        public RoundOf32Group(List<Team> teams, string name)
+        {
+            Teams = teams;
+            Name = name;
+            MatchHistory = new MatchHistory();
+
+            InitMatches();
+        }
+
         public List<Team> ChooseWinners()
         {
             foreach(Match match in Matches)
@@ -149,7 +185,12 @@ namespace WorldCup2018
                 MatchHistory.Matches.Add(match);
             }
 
-            return new List<Team>();
+            List<Team> copyOfTeams = new List<Team>(Teams);
+            Team firstPlaceTeam = RankTeams(copyOfTeams);
+            copyOfTeams.Remove(firstPlaceTeam);
+            Team secondPlaceTeam = RankTeams(copyOfTeams);
+
+            return new List<Team> { firstPlaceTeam, secondPlaceTeam };
         }
 
         private Team RankTeams(List<Team> teamsSubset)
@@ -161,6 +202,8 @@ namespace WorldCup2018
             remainingTeams = HighestPointsTieBreaker(remainingTeams);
             remainingTeams = HighestGoalDifferenceTieBreaker(remainingTeams);
             remainingTeams = GetGreatestNumberOfPointsFromSubset(remainingTeams);
+
+            return remainingTeams.ElementAt(new Random().Next(remainingTeams.Count - 1));
             
         }
 
@@ -251,7 +294,7 @@ namespace WorldCup2018
                 }
             }
 
-            return new List<Team>();
+            return toReturn;
         }
 
         private List<Team> HighestPointsTieBreaker(List<Team> teamsSubset)
